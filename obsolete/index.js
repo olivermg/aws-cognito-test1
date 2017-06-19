@@ -4,8 +4,8 @@ var device = awsiot.device({
 	clientId: 'client123',
 	region: 'eu-west-1',
 	protocol: 'wss',
-	accessKeyId: 'AKIAJQJUCSBB5ZOT7LZA',
-	secretKey: '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'
+	accessKeyId: '',
+	secretKey: ''
 });
 
 device.on('connect', function() {
