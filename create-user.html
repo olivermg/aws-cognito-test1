@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html>
 	<body>
+		<input id="email" type="text" placeholder="email">
+		<input id="username" type="text" placeholder="username">
+		<input id="password" type="password" placeholder="password">
+		<button onclick="handle();">create</button>
+
 		<script src="lib/aws-cognito-sdk.min.js"></script>
 		<script src="lib/amazon-cognito-identity.min.js"></script>
 		<script>
-AWSCognito.config.region = 'eu-west-1';
-
-var poolData = {
-	UserPoolId: 'eu-west-1_jWXOE6x1x',
-	ClientId: '6to3dgrpbiqge4av1oj25tf2h'
-};
-var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
-/*
-var userData = {
-	Username: '',
-	Pool: userPool
-};
-*/
-
-var attributeList = [];
-/*
-var dataEmail = {
-	Name: 'email',
-	Value: 'void1976+asdasfsdf@gmail.com'
-};
-var attributeEmail = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataEmail);
-attributeList.push(attributeEmail);
-*/
-
-var cognitoUser;
-userPool.signUp('void1976', 'password1', attributeList, null, function(err, result) {
-	if (err) {
-		alert(err);
-		return;
-	}
-	cognitoUser = result.user;
-	console.log('username is ' + cognitoUser.getUsername());
-});
+function handle() {
+	AWSCognito.config.region = 'eu-west-1';
+	
+	var poolData = {
+		UserPoolId: 'eu-west-1_jWXOE6x1x',
+		ClientId: '6to3dgrpbiqge4av1oj25tf2h'
+	};
+	var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+	
+	var attributeList = [];
+	var dataEmail = {
+		Name: 'email',
+		Value: document.getElementById('email').value
+	};
+	var attributeEmail = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserAttribute(dataEmail);
+	attributeList.push(attributeEmail);
+	
+	var cognitoUser;
+	userPool.signUp(document.getElementById('username').value,
+			document.getElementById('password').value,
+			attributeList, null, function(err, result)
+	{
+		if (err) {
+			alert(err);
+			return;
+		}
+		cognitoUser = result.user;
+		console.log('username is ' + cognitoUser.getUsername());
+	});
+}
 		</script>
 	</body>
 </html>

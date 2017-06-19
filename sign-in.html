@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html>
 	<body>
+		<input id="username" type="text" placeholder="username">
+		<input id="password" type="password" placeholder="password">
+		<button onclick="handle();">sign in</button>
+
 		<script src="lib/aws-cognito-sdk.min.js"></script>
 		<script src="lib/amazon-cognito-identity.min.js"></script>
 		<script>
-AWSCognito.config.region = 'eu-west-1';
-
-var poolData = {
-	UserPoolId: 'eu-west-1_jWXOE6x1x',
-	ClientId: '6to3dgrpbiqge4av1oj25tf2h'
-};
-var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
-
-var userData = {
-	Username: 'void1976',
-	Pool: userPool
-};
-var authenticationData = {
-	Username: 'void1976',
-	Password: 'password1'
-};
-var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
-
-var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
-cognitoUser.authenticateUser(authenticationDetails, {
-	onSuccess: function (result) {
-		console.log('access token + ' + result.getAccessToken().getJwtToken());
-	},
-
-	onFailure: function (err) {
-		alert(err);
-	}
-});
-
+function handle() {
+	AWSCognito.config.region = 'eu-west-1';
+	
+	var poolData = {
+		UserPoolId: 'eu-west-1_jWXOE6x1x',
+		ClientId: '6to3dgrpbiqge4av1oj25tf2h'
+	};
+	var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+	
+	var userData = {
+		Username: document.getElementById('username').value,
+		Pool: userPool
+	};
+	var authenticationData = {
+		Username: document.getElementById('username').value,
+		Password: document.getElementById('password').value
+	};
+	var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
+	
+	var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+	cognitoUser.authenticateUser(authenticationDetails, {
+		onSuccess: function (result) {
+			console.log('access token + ' + result.getAccessToken().getJwtToken());
+		},
+	
+		onFailure: function (err) {
+			alert(err);
+		}
+	});
+}
 		</script>
 	</body>
 </html>
