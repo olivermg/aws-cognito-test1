@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <input id="email" type="text" placeholder="email">
+        <input id="username" type="text" placeholder="username">
+        <input id="password" type="password" placeholder="password">
+        <input id="confirmationcode" type="text" placeholder="confirmation code">
+        <button onclick="create();">create</button>
+        <button onclick="confirm();">confirm</button>
+        <button onclick="signin();">sign in</button>
+        <button onclick="getcreds();">get credentials</button>
+        <!--button onclick="attachiotpolicy();">attach iot policy</button-->
+        <!--button onclick="iotsubscribe();">iot subscribe</button-->
+
+        <script src="lib/aws-sdk.min.js"></script>
+        <script>var AWSCognito = AWS;</script>
+        <!--script src="lib/aws-cognito-sdk.min.js"></script-->
+        <script src="lib/amazon-cognito-identity.min.js"></script>
+        <!--script src="lib/aws-iot-sdk-browser-bundle.js"></script-->
+        <script>
+         AWS.config.region = 'eu-west-1';
+
+         var poolData = {
+             UserPoolId: 'eu-west-1_jWXOE6x1x',
+             ClientId: '6to3dgrpbiqge4av1oj25tf2h'
+         };
+         var userPool = new AWS.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+         var signinResult;
+
+         function create() {
+             var attributeList = [];
+             var dataEmail = {
+                 Name: 'email',
+                 Value: document.getElementById('email').value
+             };
+             var attributeEmail = new AWS.CognitoIdentityServiceProvider.CognitoUserAttribute(dataEmail);
+             attributeList.push(attributeEmail);
+
+             var cognitoUser;
+             userPool.signUp(document.getElementById('username').value,
+                             document.getElementById('password').value,
+                             attributeList, null, function(err, result)
+                 {
+                     if (err) {
+                         alert(err);
+                         return;
+                     }
+                     cognitoUser = result.user;
+                     alert('username is ' + cognitoUser.getUsername());
+                 });
+         }
+
+         function confirm() {
+             var userData = {
+                 Username: document.getElementById('username').value,
+                 Pool: userPool
+             };
+             var cognitoUser = new AWS.CognitoIdentityServiceProvider.CognitoUser(userData);
+
+             cognitoUser.confirmRegistration(document.getElementById('confirmationcode').value, true, function (err, result) {
+                 if (err) {
+                     alert(err);
+                     return;
+                 }
+                 console.log('call result: ' + result);
+                 alert('success');
+             });
+         }
+
+         function signin() {
+             var userData = {
+                 Username: document.getElementById('username').value,
+                 Pool: userPool
+             };
+             var cognitoUser = new AWS.CognitoIdentityServiceProvider.CognitoUser(userData);
+
+             var authenticationData = {
+                 Username: document.getElementById('username').value,
+                 Password: document.getElementById('password').value
+             };
+             var authenticationDetails = new AWS.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
+
+             cognitoUser.authenticateUser(authenticationDetails, {
+                 onSuccess: function (result) {
+                     signinResult = result;
+                     console.log('access token: ' + result.getAccessToken().getJwtToken());
+                     console.log('id token: ' + result.getIdToken().getJwtToken());
+                     alert('success');
+                 },
+
+                 onFailure: function (err) {
+                     alert(err);
+                 }
+             });
+         }
+
+         function getcreds() {
+             var creds = new AWS.CognitoIdentityCredentials({
+                 IdentityPoolId: 'eu-west-1:ced310dc-9feb-41e7-b098-1ee17e92a2ce',
+                 Logins: { // without this, it would be an unauthed request
+                     'cognito-idp.eu-west-1.amazonaws.com/eu-west-1_jWXOE6x1x': signinResult.getIdToken().getJwtToken()
+                 }
+             });
+
+             AWS.config.credentials = creds;
+
+             AWS.config.credentials.get(function(err) {
+                 if (err) {
+                     alert(err);
+                 }
+                 console.log(AWS.config.credentials);
+                 alert('success');
+             });
+         }
+
+         /*
+            function attachiotpolicy() {
+            var iot = new AWS.Iot();
+
+            var params = {
+            policyName: 'iotpolicy1',
+            principal: AWS.config.credentials.identityId
+            };
+            iot.attachPrincipalPolicy(params, function (err, result) {
+            if (err) {
+            alert(err);
+            return;
+            }
+            console.log(result);
+            alert('success');
+            });
+            }
+          */
+
+         /*
+         function iotsubscribe() {
+             var
+             var device = {
+                 clientId: 'iotclient1',
+                 region: 'eu-west-1',
+                 protocol: 'wss',
+                 accessKeyId: AWS.config.credentials.accessKeyId,
+                 secretKey: AWS.config.credentials.secretKey
+             };
+
+             device.on('connect', function() {
+                 console.log('connect');
+                 device.subscribe('iottopic1');
+             });
+
+             device.on('message', function(topic, payload) {
+                 console.log('message', topic, payload.toString());
+                 //device.publish('iottopic1', JSON.stringify({ foo: 'bar123' }));
+             });
+         }
+         */
+        </script>
+    </body>
+</html>
