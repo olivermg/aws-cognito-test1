@@ -2,6 +2,8 @@ import java.util.Map;
 import java.util.HashMap;
 import com.amazonaws.services.cognitoidentity.*;
 import com.amazonaws.services.cognitoidentity.model.*;
+import com.amazonaws.services.securitytoken.*;
+import com.amazonaws.services.securitytoken.model.*;
 
 public class JavaClient {
     private static String getId(AmazonCognitoIdentity client, String idToken) {
@@ -31,13 +33,16 @@ public class JavaClient {
         return tokenResponse.getToken();
     }
 
-    /*
-    private static Credentials assumeRoleWithWebIdentity(String openIdToken) {
-        AWSSecurityTokenService stsClient = new AWSSecurityTokenServiceClient(new AnonymousAWSCredentials());
+    private static com.amazonaws.services.securitytoken.model.Credentials assumeRoleWithWebIdentity(String openIdToken) {
+        AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.defaultClient();
         AssumeRoleWithWebIdentityRequest stsReq = new AssumeRoleWithWebIdentityRequest();
-        stsReq.setRoleArn();
+        stsReq.setRoleArn("arn:aws:iam::962362945363:role/Cognito_idpool1Auth_Role");
+        stsReq.setWebIdentityToken(openIdToken);
+        stsReq.setRoleSessionName("TestRole1");
+        AssumeRoleWithWebIdentityResult stsRes = stsClient.assumeRoleWithWebIdentity(stsReq);
+
+        return stsRes.getCredentials();
     }
-    */
 
     public static void main(String[] args) {
         String idToken = System.getenv("AWS_COGNITO_IDTOKEN"); // you get this from js signin (see index.html)
@@ -45,8 +50,10 @@ public class JavaClient {
         AmazonCognitoIdentity client = AmazonCognitoIdentityClientBuilder.defaultClient();
         String identityId = getId(client, idToken);
         String openIdToken = getOpenIdToken(client, identityId, idToken);
+        com.amazonaws.services.securitytoken.model.Credentials credentials = assumeRoleWithWebIdentity(openIdToken);
 
         System.out.println("identityId: " + identityId);
         System.out.println("openIdToken: " + openIdToken);
+        System.out.println("credentials: " + credentials.toString());
     }
 }
