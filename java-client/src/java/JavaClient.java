@@ -50,10 +50,21 @@ public class JavaClient {
         AmazonCognitoIdentity client = AmazonCognitoIdentityClientBuilder.defaultClient();
         String identityId = getId(client, idToken);
         String openIdToken = getOpenIdToken(client, identityId, idToken);
-        com.amazonaws.services.securitytoken.model.Credentials credentials = assumeRoleWithWebIdentity(openIdToken);
+
+        com.amazonaws.services.securitytoken.model.Credentials credentials1 = assumeRoleWithWebIdentity(openIdToken);
 
         System.out.println("identityId: " + identityId);
-        System.out.println("openIdToken: " + openIdToken);
-        System.out.println("credentials: " + credentials.toString());
+        System.out.println("\nopenIdToken: " + openIdToken);
+        System.out.println("\ncredentials1: " + credentials1.toString());
+
+        try {
+            System.out.println("\ngetting credentials again after 5s...");
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println("\nINTERRUPTED!");
+        }
+        com.amazonaws.services.securitytoken.model.Credentials credentials2 = assumeRoleWithWebIdentity(openIdToken);
+
+        System.out.println("\ncredentials2: " + credentials2.toString());
     }
 }
