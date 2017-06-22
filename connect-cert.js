@@ -1,7 +1,13 @@
 var awsiot = require('aws-iot-device-sdk');
 
+var certId = process.env['CERTID'];
+if (!certId) {
+    console.log('please set env var CERTID.');
+    process.exit(1);
+}
+
 var device = awsiot.device({
-    clientId: 'iotclient1',
+    clientId: certId,
     region: 'eu-west-1',
     //protocol: 'wss', // no option when authenticating via cert
     keyPath: 'cert/private.pem.key',
@@ -11,7 +17,7 @@ var device = awsiot.device({
 
 device.on('connect', function() {
     console.log('connect');
-    device.subscribe('iottopic1', function(res) {
+    device.subscribe(certId + '/newfacts', function(res) {
         console.log('subscribe res: ', res);
     });
 });
