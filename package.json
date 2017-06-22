@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "aws-iot-device-sdk": "^1.0.14",
+    "aws-sdk": "^2.75.0"
+  }
+}
