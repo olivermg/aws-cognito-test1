@@ -46,16 +46,20 @@ public class JavaClient {
 
     public static void main(String[] args) {
         String idToken = System.getenv("AWS_COGNITO_IDTOKEN"); // you get this from js signin (see index.html)
+        String identityId;
+        String openIdToken = System.getenv("AWS_COGNITO_OPENIDTOKEN");
 
-        AmazonCognitoIdentity client = AmazonCognitoIdentityClientBuilder.defaultClient();
-        String identityId = getId(client, idToken);
-        String openIdToken = getOpenIdToken(client, identityId, idToken);
+        if (openIdToken == null || openIdToken.isEmpty()) {
+            AmazonCognitoIdentity client = AmazonCognitoIdentityClientBuilder.defaultClient();
+            identityId = getId(client, idToken);
+            openIdToken = getOpenIdToken(client, identityId, idToken);
+        }
 
         com.amazonaws.services.securitytoken.model.Credentials credentials1 = assumeRoleWithWebIdentity(openIdToken);
 
         System.out.println("identityId: " + identityId);
         System.out.println("\nopenIdToken: " + openIdToken);
-        System.out.println("\ncredentials1: " + credentials1.toString());
+        System.out.println("\ncredentials1: " + credentials1);
 
         try {
             System.out.println("\ngetting credentials again after 5s...");
